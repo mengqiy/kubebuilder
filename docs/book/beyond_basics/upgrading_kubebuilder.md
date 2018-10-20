@@ -27,7 +27,7 @@ information.
 {% method %}
 
 Update your project's dependencies to the latest version of the libraries used by kubebuilder.  This
-will modify *Gopkg.toml* by rewriting the `[[override]]` elements beneath the
+will modify *Gopkg.toml* by rewriting the `[[constraint]]` and`[[override]]` stanzas beneath the
 `# DO NOT MODIFY BELOW THIS LINE.` line.  Rules added by the user above this line will be retained.
 
 Gopkg.toml's without the `# DO NOT MODIFY BELOW THIS LINE.` will be ignored.
