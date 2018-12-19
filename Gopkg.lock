@@ -929,15 +929,16 @@
   revision = "b072ef59824b16023b0e12c94d0040d99059a961"
 
 [[projects]]
-  branch = "master"
-  digest = "1:0c967d0a07a1320a079e56154a912528728446295136ed8fc7595d8548445965"
+  digest = "1:1b357310eaf2f448295aa077aaf077b56170bda56d2425f1d5d097ee4ff1c1ac"
   name = "sigs.k8s.io/testing_frameworks"
   packages = [
     "integration",
+    "integration/addr",
     "integration/internal",
   ]
   pruneopts = "NT"
-  revision = "5818a3a284a11812aaed11d5ca0bcadec2c50e83"
+  revision = "d348cb12705b516376e0c323bacca72b00a78425"
+  version = "v0.1.1"
 
 [solve-meta]
   analyzer-name = "dep"
