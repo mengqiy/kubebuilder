@@ -4,12 +4,13 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: krakens.creatures.testproject.org
+  annotations:
+    certmanager.k8s.io/inject-ca-from: $(NAMESPACE)/$(CERTIFICATENAME)
 spec:
   conversion:
     strategy: Webhook
     webhookClientConfig:
       caBundle: XG4= # this is "\n" used as a placeholder
       service:
-        namespace: $(NAMESPACE)
         name: webhook-service
         path: /convert-kraken

@@ -69,5 +69,5 @@ scaffold_test_project() {
 }
 
 build_kb && \
-scaffold_test_project project 1 && \
+#scaffold_test_project project 1 && \
 scaffold_test_project project_v2 2

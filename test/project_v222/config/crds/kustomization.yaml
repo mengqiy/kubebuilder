@@ -8,8 +8,8 @@ resources:
 
 patches:
   # patches here are for enabling the conversion webhook for each CRD
-#- patches/crew_firstmate_patch.yaml
-#- patches/creatures_kraken_patch.yaml
+- patches/crew_firstmate_patch.yaml
+- patches/creatures_kraken_patch.yaml
 
 configurations:
 - kustomizeconfig.yaml

@@ -29,7 +29,7 @@ deploy: manifests
 manifests:
 # TODO(droot): controller-gen will require fix to take new api-path as input, so disabling this for now
 # 
-#	go run vendor/sigs.k8s.io/controller-tools/cmd/controller-gen/main.go all
+#	go run vendor/sigs.k8s.io/controller-tools/cmd/controller-gen/main.go all --output-dir=config/crds/bases/
 
 # Run go fmt against code
 fmt:

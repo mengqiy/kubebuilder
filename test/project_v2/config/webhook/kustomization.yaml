@@ -1,0 +1,6 @@
+resources:
+- webhookmanifests.yaml
+
+# the following config is for teaching kustomize where to look at when substituting vars.
+ configurations:
+- kustomizeconfig.yaml
