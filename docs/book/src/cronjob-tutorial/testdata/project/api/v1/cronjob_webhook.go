@@ -24,7 +24,6 @@ import (
 	"github.com/robfig/cron"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	apimachineryvalidation "k8s.io/apimachinery/pkg/api/validation"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	apimachineryutilvalidation "k8s.io/apimachinery/pkg/util/validation"
@@ -35,7 +34,7 @@ import (
 )
 
 /*
-Next, we'll setup logger for the webhooks.
+Next, we'll setup a logger for the webhooks.
 */
 
 var log = logf.Log.WithName("cronjob-resource")
@@ -52,15 +51,15 @@ The meaning of each marker can be found [here](../TODO.md).
 // +kubebuilder:webhook:path=/validate-batch-tutorial-kubebuilder-io-v1-cronjob,mutating=false,failurePolicy=fail,groups=batch.tutorial.kubebuilder.io,resources=cronjobs,verbs=create;update,versions=v1,name=vcronjob.kb.io
 
 /*
-We implement the `webhook.Defaulter` interface for our CronJob CRD.
-`webhook.Defaulter` only has one method: `Default()`.
-If `webhook.Defaulter` is implemented, a webhook server will be autowired to
-serve as the mutating webhook for CronJobs.
+We use the `webhook.Defaulter` interface to set defaults to our CRD.
+A webhook will automatically be served that calls this defaulting.
 */
 
 var _ webhook.Defaulter = &CronJob{}
 
-// Default implements webhookutil.defaulter so a webhook will be registered for the type
+/*
+The Default method is expected to mutate the receiver, setting the defaults.
+*/
 func (c *CronJob) Default() {
 	log.Info("defaulting cronjob", "namespace", c.Namespace, "name", c.Name)
 
@@ -81,44 +80,56 @@ func (c *CronJob) Default() {
 }
 
 /*
-We implement the `webhook.Validator` interface for our CronJob CRD.
-`webhook.Validator` interface has two methods: `ValidateCreate()` and `ValidateUpdate()`.
-If `webhook.Validator` is implemented, a webhook server will be autowired to
-serve as the validating webhook for CronJobs.
+We use the `webhook.Validator` interface to validate our CRD.
+A webhook will automatically be served that calls the validation.
 */
 
 var _ webhook.Validator = &CronJob{}
 
-// ValidateCreate implements webhookutil.validator so a webhook will be registered for the type
+/*
+The ValidateCreate method is expected to validate that its receiver upon creation.
+If not, it return an error that's used as a validation message.
+We separate out ValidateCreate from ValidateUpdate to allow behavior
+like making certain fields immutable, so that they can only be set on creation.
+Here, however, we just use the same shared validation.
+*/
 func (c *CronJob) ValidateCreate() error {
 	log.Info("validate create", "namespace", c.Namespace, "name", c.Name)
 	return c.validateCronJob()
 }
 
-// ValidateUpdate implements webhookutil.validator so a webhook will be registered for the type
+/*
+The ValidateUpdate method is expected to validate the receiver upon update.
+If not, it return an error that's used as a validation message.
+The receiver is the new object and the argument is the old object.
+*/
 func (c *CronJob) ValidateUpdate(old runtime.Object) error {
 	log.Info("validate update", "namespace", c.Namespace, "name", c.Name)
 	return c.validateCronJob()
 }
 
 /*
-We uses the same the validation logic for creation and update.
+We validate the name and the spec of the CronJob.
 */
 
 func (c *CronJob) validateCronJob() error {
 	allErrs := c.validateCronJobSpec()
-	if len(c.ObjectMeta.Name) > apimachineryutilvalidation.DNS1035LabelMaxLength-11 {
-		// The cronjob controller appends a 11-character suffix to the cronjob (`-$TIMESTAMP`) when
-		// creating a job. The job name length limit is 63 characters.
-		// Therefore cronjob names must have length <= 63-11=52. If we don't validate this here,
-		// then job creation will fail later.
-		allErrs = append(allErrs, field.Invalid(field.NewPath("metadata").Child("name"), c.Name, "must be no more than 52 characters"))
+	if err := c.validateCronJobName(); err != nil {
+		allErrs = append(allErrs, err)
 	}
 
 	return apierrors.NewInvalid(
 		schema.GroupKind{Group: "batch.tutorial.kubebuilder.io", Kind: "CronJob"},
 		c.Name, allErrs)
 }
+
+/*
+Some fields are declaratively validated by openapi schema.
+You can find kubebuilder validation markers (prefixed
+with `// +kubebuilder:validation`) in the [API](api-design.md)
+You can find all of the kubebuilder supported markers for
+declaring validation in [here](../TODO.md).
+*/
 
 func (c *CronJob) validateCronJobSpec() field.ErrorList {
 	allErrs := field.ErrorList{}
@@ -131,45 +142,37 @@ func (c *CronJob) validateCronJobSpec() field.ErrorList {
 	} else {
 		allErrs = append(allErrs, validateScheduleFormat(spec.Schedule, fldPath.Child("schedule"))...)
 	}
-	if spec.StartingDeadlineSeconds != nil {
-		allErrs = append(allErrs, apimachineryvalidation.ValidateNonnegativeField(int64(*spec.StartingDeadlineSeconds), fldPath.Child("startingDeadlineSeconds"))...)
-	}
-	allErrs = append(allErrs, validateConcurrencyPolicy(&spec.ConcurrencyPolicy, fldPath.Child("concurrencyPolicy"))...)
-	//allErrs = append(allErrs, ValidateJobTemplateSpec(&spec.JobTemplate, fldPath.Child("jobTemplate"))...)
-
-	if spec.SuccessfulJobsHistoryLimit != nil {
-		// zero is a valid SuccessfulJobsHistoryLimit
-		allErrs = append(allErrs, apimachineryvalidation.ValidateNonnegativeField(int64(*spec.SuccessfulJobsHistoryLimit), fldPath.Child("successfulJobsHistoryLimit"))...)
-	}
-	if spec.FailedJobsHistoryLimit != nil {
-		// zero is a valid SuccessfulJobsHistoryLimit
-		allErrs = append(allErrs, apimachineryvalidation.ValidateNonnegativeField(int64(*spec.FailedJobsHistoryLimit), fldPath.Child("failedJobsHistoryLimit"))...)
-	}
 
 	return allErrs
 }
 
 /*
-Validate .spec.concurrencyPolicy presents and is valid.
+Validating the length of a string field can be done declaratively by
+the validation schema.
+
+But the `ObjectMeta.Name` field is defined in a shared package under
+the apimachinery repo, so we can't declaratively validate it using
+the validation schema.
 */
 
-func validateConcurrencyPolicy(concurrencyPolicy *ConcurrencyPolicy, fldPath *field.Path) field.ErrorList {
-	allErrs := field.ErrorList{}
-	switch *concurrencyPolicy {
-	case AllowConcurrent, ForbidConcurrent, ReplaceConcurrent:
-		break
-	case "":
-		allErrs = append(allErrs, field.Required(fldPath, ""))
-	default:
-		validValues := []string{string(AllowConcurrent), string(ForbidConcurrent), string(ReplaceConcurrent)}
-		allErrs = append(allErrs, field.NotSupported(fldPath, *concurrencyPolicy, validValues))
+func (c *CronJob) validateCronJobName() *field.Error {
+	if len(c.ObjectMeta.Name) > apimachineryutilvalidation.DNS1035LabelMaxLength-11 {
+		// The job name length is 63 character like all Kubernetes objects
+		// (which must fit in a DNS subdomain). The cronjob controller appends
+		// a 11-character suffix to the cronjob (`-$TIMESTAMP`) when creating
+		// a job. The job name length limit is 63 characters. Therefore cronjob
+		// names must have length <= 63-11=52. If we don't validate this here,
+		// then job creation will fail later.
+		return field.Invalid(field.NewPath("metadata").Child("name"), c.Name, "must be no more than 52 characters")
 	}
-
-	return allErrs
+	return nil
 }
 
+// +kubebuilder:docs-gen:collapse=Validate object name
+
 /*
-Validate the [cron](https://en.wikipedia.org/wiki/Cron) schedule is well-formatted.
+We'll need to validate the [cron](https://en.wikipedia.org/wiki/Cron) schedule
+is well-formatted.
 */
 
 func validateScheduleFormat(schedule string, fldPath *field.Path) field.ErrorList {
@@ -180,3 +183,5 @@ func validateScheduleFormat(schedule string, fldPath *field.Path) field.ErrorLis
 
 	return allErrs
 }
+
+// +kubebuilder:docs-gen:collapse=Validate schedule format
