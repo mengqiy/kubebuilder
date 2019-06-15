@@ -57,6 +57,8 @@ the fields.
 
 // CronJobSpec defines the desired state of CronJob
 type CronJobSpec struct {
+	// +kubebuilder:validation:Minimum=0
+
 	// The schedule in Cron format, see https://en.wikipedia.org/wiki/Cron.
 	Schedule string `json:"schedule"`
 

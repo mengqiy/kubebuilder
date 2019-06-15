@@ -40,7 +40,7 @@ Next, we'll setup a logger for the webhooks.
 var log = logf.Log.WithName("cronjob-resource")
 
 /*
-Notice that we use kubebuilder markers to generate some webhook manifests.
+Notice that we use kubebuilder markers to generate webhook manifests.
 The first and second markers are responsible for generating a mutating webhook manifest and a validating
 webhook manifest respectively.
 
@@ -133,16 +133,9 @@ declaring validation in [here](../TODO.md).
 
 func (c *CronJob) validateCronJobSpec() field.ErrorList {
 	allErrs := field.ErrorList{}
-
-	spec := c.Spec
-	fldPath := field.NewPath("spec")
-
-	if len(spec.Schedule) == 0 {
-		allErrs = append(allErrs, field.Required(fldPath.Child("schedule"), ""))
-	} else {
-		allErrs = append(allErrs, validateScheduleFormat(spec.Schedule, fldPath.Child("schedule"))...)
-	}
-
+	allErrs = append(allErrs, validateScheduleFormat(
+		c.Spec.Schedule,
+		field.NewPath("spec").Child("schedule"))...)
 	return allErrs
 }
 

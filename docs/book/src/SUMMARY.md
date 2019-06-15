@@ -6,14 +6,6 @@
 
 ---
 
-- [Main Concepts](reference/reference.md)
-
-  - [What's a webhook?](reference/webhook-overview.md)
-
-    - [Admission webhook](reference/admission-webhook.md)
-
----
-
 - [Tutorial: Building CronJob](cronjob-tutorial/cronjob-tutorial.md)
 
   - [What's in a basic project?](./cronjob-tutorial/basic-project.md)
@@ -33,6 +25,8 @@
   - [Running and deploying the controller](./cronjob-tutorial/running.md)
   
     - [Deploying the cert manager](./cronjob-tutorial/cert-manager.md)
+    - [Deploying webhooks](./cronjob-tutorial/running-webhook.md)
+    - [Kind cluster](./cronjob-tutorial/kind.md)
   
   - [Epilogue](./cronjob-tutorial/epilogue.md)
 
@@ -41,6 +35,9 @@
 - [Reference](./reference/reference.md)
 
   - [Using Finalizers](./reference/using-finalizers.md)
+  - [What's a webhook?](reference/webhook-overview.md)
+
+    - [Admission webhook](reference/admission-webhook.md)
 
 ---
 
