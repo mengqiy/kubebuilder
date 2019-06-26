@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"sigs.k8s.io/kubebuilder/pkg/scaffold/input"
+	"sigs.k8s.io/kubebuilder/pkg/scaffold/util"
 	"sigs.k8s.io/kubebuilder/pkg/scaffold/v1/resource"
 )
 
@@ -51,7 +52,7 @@ type AdmissionHandler struct {
 
 // GetInput implements input.File
 func (a *AdmissionHandler) GetInput() (input.Input, error) {
-	a.ResourcePackage, a.GroupDomain = getResourceInfo(coreGroups, a.Resource, a.Input)
+	a.ResourcePackage, a.GroupDomain = util.GetResourceInfo(a.Resource, a.Input)
 	a.Type = strings.ToLower(a.Type)
 	if a.Type == "mutating" {
 		a.Mutate = true

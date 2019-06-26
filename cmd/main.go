@@ -116,6 +116,7 @@ func main() {
 	rootCmd.AddCommand(
 		newInitProjectCmd(),
 		newAPICommand(),
+		newWebhookV2Cmd(),
 		version.NewVersionCmd(),
 		newDocsCmd(),
 		newVendorUpdateCmd(),

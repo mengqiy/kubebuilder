@@ -40,8 +40,8 @@ func newWebhookCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "webhook",
-		Short: "Scaffold a webhook server",
-		Long: `Scaffold a webhook server if there is no existing server.
+		Short: "Scaffold a webhook server for v1 scaffolding.",
+		Long: `Scaffold a webhook server for v1 scaffolding. if there is no existing server.
 Scaffolds webhook handlers based on group, version, kind and other user inputs.
 This command is only available for v1 scaffolding project.
 `,
@@ -58,7 +58,7 @@ This command is only available for v1 scaffolding project.
 			}
 
 			if projectInfo.Version != project.Version1 {
-				fmt.Printf("webhook scaffolding is not supported for this project version: %s \n", projectInfo.Version)
+				fmt.Printf("kubebuilder alpha webhook is for project version: 1, the version of this project is: %s \n", projectInfo.Version)
 				os.Exit(0)
 			}
 

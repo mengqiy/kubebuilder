@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"sigs.k8s.io/kubebuilder/pkg/scaffold/input"
+	"sigs.k8s.io/kubebuilder/pkg/scaffold/util"
 	"sigs.k8s.io/kubebuilder/pkg/scaffold/v1/resource"
 )
 
@@ -42,24 +43,7 @@ func (a *Test) GetInput() (input.Input, error) {
 			strings.ToLower(a.Resource.Kind), strings.ToLower(a.Resource.Kind)+"_controller_test.go")
 	}
 
-	// Use the k8s.io/api package for core resources
-	coreGroups := map[string]string{
-		"apps":                  "",
-		"admissionregistration": "k8s.io",
-		"apiextensions":         "k8s.io",
-		"authentication":        "k8s.io",
-		"autoscaling":           "",
-		"batch":                 "",
-		"certificates":          "k8s.io",
-		"core":                  "",
-		"extensions":            "",
-		"metrics":               "k8s.io",
-		"policy":                "",
-		"rbac.authorization":    "k8s.io",
-		"storage":               "k8s.io",
-	}
-
-	a.ResourcePackage, _ = getResourceInfo(coreGroups, a.Resource, a.Input)
+	a.ResourcePackage, _ = util.GetResourceInfo(a.Resource, a.Input)
 
 	a.TemplateBody = controllerTestTemplate
 	a.Input.IfExistsAction = input.Error
