@@ -97,7 +97,8 @@ var {{ lower .Resource.Kind }}log = logf.Log.WithName("{{ lower .Resource.Kind }
 
 func (r *{{.Resource.Kind}}) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
-		For(r)
+		For(r).
+		Complete()
 }
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!

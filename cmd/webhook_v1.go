@@ -58,7 +58,7 @@ This command is only available for v1 scaffolding project.
 			}
 
 			if projectInfo.Version != project.Version1 {
-				fmt.Printf("kubebuilder alpha webhook is for project version: 1, the version of this project is: %s \n", projectInfo.Version)
+				fmt.Printf("you should use kubebuilder create webhook command\n")
 				os.Exit(0)
 			}
 

@@ -45,4 +45,6 @@ go 1.12
 require (
 	sigs.k8s.io/controller-runtime v0.2.0-beta.2
 )
+
+replace sigs.k8s.io/controller-runtime => /Users/mengqiy/code/golang/src/sigs.k8s.io/controller-runtime
 `

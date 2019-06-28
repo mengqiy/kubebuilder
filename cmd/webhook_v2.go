@@ -39,8 +39,8 @@ func newWebhookV2Cmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "webhook",
-		Short: "Scaffold a webhook using v2 scaffolding.",
-		Long:  `Scaffold a webhook using v2 scaffolding. You can choose to scaffold defaulting and (or) validating webhooks.`,
+		Short: "Scaffold a webhook for an API resource.",
+		Long:  `Scaffold a webhook for an API resource. You can choose to scaffold defaulting and (or) validating webhooks.`,
 		Example: `	# Create defaulting and validating webhooks for CRD of group crew, version v1 and kind FirstMate.
 	kubebuilder webhook --group crew --version v1 --kind FirstMate --defaulting --programmatic-validation
 `,
@@ -104,9 +104,9 @@ func newWebhookV2Cmd() *cobra.Command {
 	}
 	o.res = gvkForFlags(cmd.Flags())
 	cmd.Flags().BoolVar(&o.defaulting, "defaulting", false,
-		"if scaffold the defaulting webhook")
+		"if set, scaffold the defaulting webhook")
 	cmd.Flags().BoolVar(&o.validation, "programmatic-validation", false,
-		"if scaffold the validating webhook")
+		"if set, scaffold the validating webhook")
 
 	return cmd
 }

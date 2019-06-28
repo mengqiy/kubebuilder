@@ -28,7 +28,8 @@ var firstmatelog = logf.Log.WithName("firstmate-resource")
 
 func (r *FirstMate) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
-		For(r)
+		For(r).
+		Complete()
 }
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!

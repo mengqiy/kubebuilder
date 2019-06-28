@@ -72,7 +72,7 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&crewv1.Captain{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "FirstMate")
+		setupLog.Error(err, "unable to create webhook", "webhook", "Captain")
 		os.Exit(1)
 	}
 	if err = (&controllers.FirstMateReconciler{

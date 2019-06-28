@@ -27,7 +27,8 @@ var captainlog = logf.Log.WithName("captain-resource")
 
 func (r *Captain) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
-		For(r)
+		For(r).
+		Complete()
 }
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!

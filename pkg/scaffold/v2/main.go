@@ -74,10 +74,10 @@ func (m *Main) Update(opts *MainUpdateOptions) error {
     }
 `, opts.Resource.Kind, opts.Resource.Kind, opts.Resource.Kind)
 	webhookSetupCodeFragment := fmt.Sprintf(`if err = (&%s%s.%s{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "FirstMate")
+		setupLog.Error(err, "unable to create webhook", "webhook", "%s")
 		os.Exit(1)
 	}
-`, opts.Resource.Group, opts.Resource.Version, opts.Resource.Kind)
+`, opts.Resource.Group, opts.Resource.Version, opts.Resource.Kind, opts.Resource.Kind)
 
 	if opts.WireResource {
 		err := internal.InsertStringsInFile(path,
