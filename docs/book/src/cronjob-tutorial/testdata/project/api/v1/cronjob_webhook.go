@@ -12,12 +12,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-// +kubebuilder:docs-gen:collapse=Apache License
+// +kubebuilder:gen-docs:collapse=Apache License
 
-/*
-We'll start out with some imports.  You'll see below that we'll need a few more imports
-than those scaffolded for us.  We'll talk about each one when we use it.
-*/
 package v1
 
 import (
@@ -26,7 +22,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	apimachineryutilvalidation "k8s.io/apimachinery/pkg/util/validation"
+	validationutils "k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -37,65 +33,88 @@ import (
 Next, we'll setup a logger for the webhooks.
 */
 
-var log = logf.Log.WithName("cronjob-resource")
+var cronjoblog = logf.Log.WithName("cronjob-resource")
+
+func (r *CronJob) SetupWebhookWithManager(mgr ctrl.Manager) error {
+	return ctrl.NewWebhookManagedBy(mgr).
+		For(r).
+		Complete()
+}
+
+// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
 /*
 Notice that we use kubebuilder markers to generate webhook manifests.
-The first and second markers are responsible for generating a mutating webhook manifest and a validating
-webhook manifest respectively.
+This markers is responsible for generating a mutating webhook manifest.
 
 The meaning of each marker can be found [here](../TODO.md).
 */
 
-// +kubebuilder:webhook:path=/mutate-batch-tutorial-kubebuilder-io-v1-cronjob,mutating=true,failurePolicy=fail,groups=batch.tutorial.kubebuilder.io,resources=cronjobs,verbs=create;update,versions=v1,name=mcronjob.kb.io
-// +kubebuilder:webhook:path=/validate-batch-tutorial-kubebuilder-io-v1-cronjob,mutating=false,failurePolicy=fail,groups=batch.tutorial.kubebuilder.io,resources=cronjobs,verbs=create;update,versions=v1,name=vcronjob.kb.io
+// +kubebuilder:webhook:path=/mutate-batch-tutorial-kubebuilder-io-tutorial-kubebuilder-io-v1-cronjob,mutating=true,failurePolicy=fail,groups=batch.tutorial.kubebuilder.io.tutorial.kubebuilder.io,resources=cronjobs,verbs=create;update,versions=v1,name=mcronjob.kb.io
 
 /*
 We use the `webhook.Defaulter` interface to set defaults to our CRD.
 A webhook will automatically be served that calls this defaulting.
+
+The Default method is expected to mutate the receiver, setting the defaults.
 */
 
 var _ webhook.Defaulter = &CronJob{}
 
-/*
-The Default method is expected to mutate the receiver, setting the defaults.
-*/
-func (c *CronJob) Default() {
-	log.Info("defaulting cronjob", "namespace", c.Namespace, "name", c.Name)
+// Default implements webhook.Defaulter so a webhook will be registered for the type
+func (r *CronJob) Default() {
+	cronjoblog.Info("default", "name", r.Name)
 
-	if c.Spec.ConcurrencyPolicy == "" {
-		c.Spec.ConcurrencyPolicy = AllowConcurrent
+	if r.Spec.ConcurrencyPolicy == "" {
+		r.Spec.ConcurrencyPolicy = AllowConcurrent
 	}
-	if c.Spec.Suspend == nil {
-		c.Spec.Suspend = new(bool)
+	if r.Spec.Suspend == nil {
+		r.Spec.Suspend = new(bool)
 	}
-	if c.Spec.SuccessfulJobsHistoryLimit == nil {
-		c.Spec.SuccessfulJobsHistoryLimit = new(int32)
-		*c.Spec.SuccessfulJobsHistoryLimit = 3
+	if r.Spec.SuccessfulJobsHistoryLimit == nil {
+		r.Spec.SuccessfulJobsHistoryLimit = new(int32)
+		*r.Spec.SuccessfulJobsHistoryLimit = 3
 	}
-	if c.Spec.FailedJobsHistoryLimit == nil {
-		c.Spec.FailedJobsHistoryLimit = new(int32)
-		*c.Spec.FailedJobsHistoryLimit = 1
+	if r.Spec.FailedJobsHistoryLimit == nil {
+		r.Spec.FailedJobsHistoryLimit = new(int32)
+		*r.Spec.FailedJobsHistoryLimit = 1
 	}
 }
 
 /*
-We use the `webhook.Validator` interface to validate our CRD.
-A webhook will automatically be served that calls the validation.
+Notice that we use kubebuilder markers to generate webhook manifests.
+This markers is responsible for generating a validating webhook manifest.
+
+The meaning of each marker can be found [here](../TODO.md).
+*/
+
+// +kubebuilder:webhook:path=/validate-batch-tutorial-kubebuilder-io-tutorial-kubebuilder-io-v1-cronjob,mutating=false,failurePolicy=fail,groups=batch.tutorial.kubebuilder.io.tutorial.kubebuilder.io,resources=cronjobs,verbs=create;update,versions=v1,name=vcronjob.kb.io
+
+/*
+To validate our CRD beyond what's possible with declarative validation.
+Generally, declarative validation should be sufficient, but sometimes more
+advanced use cases call for complex validation.
+
+For instance, we'll see below that we use this to validate a well-formed cron
+schedule without making up a long regular expression.
+
+If `webhook.Validator` interface is implemented, a webhook will automatically be
+served that calls the validation.
+
+The ValidateCreate and ValidateUpdate methods are expected to validate that its
+receiver upon creation and update respectively. We separate out ValidateCreate
+from ValidateUpdate to allow behavior like making certain fields immutable, so
+that they can only be set on creation.
+Here, however, we just use the same shared validation.
 */
 
 var _ webhook.Validator = &CronJob{}
 
-/*
-The ValidateCreate method is expected to validate that its receiver upon creation.
-If not, it return an error that's used as a validation message.
-We separate out ValidateCreate from ValidateUpdate to allow behavior
-like making certain fields immutable, so that they can only be set on creation.
-Here, however, we just use the same shared validation.
-*/
-func (c *CronJob) ValidateCreate() error {
-	log.Info("validate create", "namespace", c.Namespace, "name", c.Name)
-	return c.validateCronJob()
+// ValidateCreate implements webhook.Validator so a webhook will be registered for the type
+func (r *CronJob) ValidateCreate() error {
+	cronjoblog.Info("validate create", "name", r.Name)
+
+	return r.validateCronJob()
 }
 
 /*
@@ -103,9 +122,12 @@ The ValidateUpdate method is expected to validate the receiver upon update.
 If not, it return an error that's used as a validation message.
 The receiver is the new object and the argument is the old object.
 */
-func (c *CronJob) ValidateUpdate(old runtime.Object) error {
-	log.Info("validate update", "namespace", c.Namespace, "name", c.Name)
-	return c.validateCronJob()
+
+// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
+func (r *CronJob) ValidateUpdate(old runtime.Object) error {
+	cronjoblog.Info("validate update", "name", r.Name)
+
+	return r.validateCronJob()
 }
 
 /*
@@ -132,6 +154,8 @@ declaring validation in [here](../TODO.md).
 */
 
 func (c *CronJob) validateCronJobSpec() field.ErrorList {
+	// The field helpers from the kubernetes API machinery help us return nicely
+	// structured validation errors.
 	allErrs := field.ErrorList{}
 	allErrs = append(allErrs, validateScheduleFormat(
 		c.Spec.Schedule,
@@ -149,7 +173,7 @@ the validation schema.
 */
 
 func (c *CronJob) validateCronJobName() *field.Error {
-	if len(c.ObjectMeta.Name) > apimachineryutilvalidation.DNS1035LabelMaxLength-11 {
+	if len(c.ObjectMeta.Name) > validationutils.DNS1035LabelMaxLength-11 {
 		// The job name length is 63 character like all Kubernetes objects
 		// (which must fit in a DNS subdomain). The cronjob controller appends
 		// a 11-character suffix to the cronjob (`-$TIMESTAMP`) when creating
@@ -176,5 +200,3 @@ func validateScheduleFormat(schedule string, fldPath *field.Path) field.ErrorLis
 
 	return allErrs
 }
-
-// +kubebuilder:docs-gen:collapse=Validate schedule format

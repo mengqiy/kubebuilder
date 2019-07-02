@@ -3,7 +3,7 @@
 ## Kind Cluster
 
 It is recommended to develop your webhook with a
-[kind](./kind.md) cluster for faster iteration.
+[kind](../reference/kind.md) cluster for faster iteration.
 Why?
 
 - You can bring up a multi-node cluster locally within 1 minute.
@@ -56,3 +56,6 @@ kubectl create -f config/samples/batch_v1_cronjob.yaml
 
 You can also try to create an invalid CronJob (e.g. use an ill-formatted
 schedule field). You should see a creation failure with a validation error.
+
+**Note**: If you are
+

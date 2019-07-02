@@ -21,12 +21,11 @@
 
     - [You said something about main?](./cronjob-tutorial/main-revisited.md)
 
-  - [Implementing webhook](./cronjob-tutorial/webhook-implementation.md)
+  - [Implementing defaulting/validating webhooks](./cronjob-tutorial/webhook-implementation.md)
   - [Running and deploying the controller](./cronjob-tutorial/running.md)
   
     - [Deploying the cert manager](./cronjob-tutorial/cert-manager.md)
     - [Deploying webhooks](./cronjob-tutorial/running-webhook.md)
-    - [Kind cluster](./cronjob-tutorial/kind.md)
   
   - [Epilogue](./cronjob-tutorial/epilogue.md)
 
@@ -35,6 +34,7 @@
 - [Reference](./reference/reference.md)
 
   - [Using Finalizers](./reference/using-finalizers.md)
+  - [Kind cluster](reference/kind.md)
   - [What's a webhook?](reference/webhook-overview.md)
 
     - [Admission webhook](reference/admission-webhook.md)
